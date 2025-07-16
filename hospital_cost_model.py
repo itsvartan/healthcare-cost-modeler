@@ -132,24 +132,20 @@ INTERDEPENDENCY_MATRIX = {
 }
 
 # Initialize session state
-if 'presentation_mode' not in st.session_state:
-    st.session_state.presentation_mode = False
-if 'current_slide' not in st.session_state:
-    st.session_state.current_slide = 0
-if 'animation_step' not in st.session_state:
-    st.session_state.animation_step = 0
 if 'selected_strategy' not in st.session_state:
     st.session_state.selected_strategy = None
 if 'building_area' not in st.session_state:
     st.session_state.building_area = 250000  # 250k sqft hospital
 if 'total_budget' not in st.session_state:
     st.session_state.total_budget = 400_000_000  # $400M as mentioned
-if 'applied_changes' not in st.session_state:
-    st.session_state.applied_changes = {div: 0 for div in CSI_DIVISIONS.keys()}
+if 'manual_adjustments' not in st.session_state:
+    st.session_state.manual_adjustments = {div: 0 for div in CSI_DIVISIONS.keys()}
+if 'mode' not in st.session_state:
+    st.session_state.mode = 'strategy'  # 'strategy' or 'manual'
 
 # Helper functions
-def calculate_costs_with_strategy(strategy_key=None, step=0):
-    """Calculate costs with strategy effects applied step by step"""
+def calculate_costs(strategy_key=None, manual_adjustments=None):
+    """Calculate costs with either strategy or manual adjustments"""
     base_costs = {}
     total_base = st.session_state.total_budget
     
@@ -157,18 +153,19 @@ def calculate_costs_with_strategy(strategy_key=None, step=0):
     for div_id, div_info in CSI_DIVISIONS.items():
         base_costs[div_id] = total_base * (div_info["base_pct"] / 100)
     
-    # Apply strategy effects if selected
     current_costs = base_costs.copy()
     
     if strategy_key and strategy_key in STRATEGIES:
-        click_sequence = STRATEGIES[strategy_key]["click_sequence"]
+        # Apply strategy effects
         effects = INTERDEPENDENCY_MATRIX[strategy_key]
-        
-        # Apply effects up to current animation step
-        for i, affected_div in enumerate(click_sequence):
-            if i < step and affected_div in effects:
-                change_pct = effects.get(affected_div, 0)
-                current_costs[affected_div] = base_costs[affected_div] * (1 + change_pct / 100)
+        for div_id, change_pct in effects.items():
+            if change_pct != 0:
+                current_costs[div_id] = base_costs[div_id] * (1 + change_pct / 100)
+    
+    elif manual_adjustments:
+        # Apply manual adjustments
+        for div_id, adjustment in manual_adjustments.items():
+            current_costs[div_id] = base_costs[div_id] * (1 + adjustment / 100)
     
     return base_costs, current_costs
 
@@ -216,7 +213,7 @@ def create_animated_bar_chart(base_costs, current_costs, highlight_division=None
         xaxis={'tickangle': -45},
         plot_bgcolor='rgba(0,0,0,0)',
         paper_bgcolor='rgba(0,0,0,0)',
-        font=dict(color='white' if st.session_state.presentation_mode else 'black'),
+        font=dict(color='black'),
         showlegend=False,
         transition={
             'duration': 500,
@@ -227,130 +224,51 @@ def create_animated_bar_chart(base_costs, current_costs, highlight_division=None
     return fig
 
 # Main App
-if st.session_state.presentation_mode:
-    # Presentation Mode UI
-    st.markdown('<div class="presentation-mode">', unsafe_allow_html=True)
-    
-    # Title slide or content
-    if st.session_state.current_slide == 0:
-        st.markdown("""
-        <div style="height: 80vh; display: flex; flex-direction: column; justify-content: center; align-items: center;">
-            <h1 style="font-size: 48px; text-align: center;">Integrated Design Strategies</h1>
-            <h2 style="font-size: 32px; text-align: center; color: #888;">Hospital Construction Cost Optimization</h2>
-            <p style="font-size: 24px; text-align: center; margin-top: 40px;">Click to begin</p>
-        </div>
-        """, unsafe_allow_html=True)
-    else:
-        # Strategy slides
-        strategy_keys = list(STRATEGIES.keys())
-        if st.session_state.current_slide <= len(strategy_keys):
-            strategy_key = strategy_keys[st.session_state.current_slide - 1]
-            strategy = STRATEGIES[strategy_key]
-            
-            st.markdown(f"<h2>{strategy['name']}</h2>", unsafe_allow_html=True)
-            st.markdown(f"<p style='font-size: 18px;'>{strategy['description']}</p>", unsafe_allow_html=True)
-            
-            # Get current animation step
-            base_costs, current_costs = calculate_costs_with_strategy(
-                strategy_key, 
-                st.session_state.animation_step
-            )
-            
-            # Highlight current division being animated
-            click_sequence = strategy["click_sequence"]
-            highlight_div = None
-            if st.session_state.animation_step > 0 and st.session_state.animation_step <= len(click_sequence):
-                highlight_div = click_sequence[st.session_state.animation_step - 1]
-            
-            # Display chart
-            fig = create_animated_bar_chart(base_costs, current_costs, highlight_div)
-            st.plotly_chart(fig, use_container_width=True)
-            
-            # Show impact summary
-            if st.session_state.animation_step > 0:
-                st.markdown("### Impact:")
-                for i in range(min(st.session_state.animation_step, len(click_sequence))):
-                    div = click_sequence[i]
-                    change = INTERDEPENDENCY_MATRIX[strategy_key].get(div, 0)
-                    if change != 0:
-                        color = "🟢" if change < 0 else "🔴"
-                        st.markdown(f"{color} **{CSI_DIVISIONS[div]['name']}**: {change:+.1f}%")
-    
-    # Presentation controls
-    col1, col2, col3 = st.columns([1, 6, 1])
-    with col1:
-        if st.button("← Previous"):
-            if st.session_state.animation_step > 0:
-                st.session_state.animation_step -= 1
-            else:
-                st.session_state.current_slide = max(0, st.session_state.current_slide - 1)
-                st.session_state.animation_step = 0
-            st.rerun()
-    
-    with col3:
-        if st.button("Next →"):
-            strategy_keys = list(STRATEGIES.keys())
-            if st.session_state.current_slide > 0 and st.session_state.current_slide <= len(strategy_keys):
-                strategy_key = strategy_keys[st.session_state.current_slide - 1]
-                max_steps = len(STRATEGIES[strategy_key]["click_sequence"]) + 1
-                
-                if st.session_state.animation_step < max_steps:
-                    st.session_state.animation_step += 1
-                else:
-                    st.session_state.current_slide += 1
-                    st.session_state.animation_step = 0
-            else:
-                st.session_state.current_slide += 1
-                st.session_state.animation_step = 0
-            st.rerun()
-    
-    st.markdown('</div>', unsafe_allow_html=True)
+st.title("🏥 Hospital Construction Cost Modeling Tool")
+st.markdown("Interactive tool for demonstrating integrated design cost strategies")
 
-else:
-    # Regular Interactive Mode
-    st.title("🏥 Hospital Construction Cost Modeling Tool")
-    st.markdown("Interactive tool for demonstrating integrated design cost strategies")
+# Sidebar
+with st.sidebar:
+    st.header("Settings")
     
-    # Sidebar
-    with st.sidebar:
-        st.header("Settings")
-        
-        # Toggle presentation mode
-        if st.button("🎥 Enter Presentation Mode"):
-            st.session_state.presentation_mode = True
-            st.session_state.current_slide = 0
-            st.session_state.animation_step = 0
-            st.rerun()
-        
-        st.divider()
-        
-        # Budget settings
-        st.subheader("Project Configuration")
-        
-        total_budget = st.number_input(
-            "Total Project Budget ($)",
-            min_value=100_000_000,
-            max_value=1_000_000_000,
-            value=st.session_state.total_budget,
-            step=10_000_000,
-            format="%d"
-        )
-        st.session_state.total_budget = total_budget
-        
-        building_area = st.number_input(
-            "Building Area (sq ft)",
-            min_value=100000,
-            max_value=500000,
-            value=st.session_state.building_area,
-            step=10000
-        )
-        st.session_state.building_area = building_area
-        
-        st.metric("Cost per sq ft", f"${total_budget / building_area:.0f}")
-        
-        st.divider()
-        
-        # Strategy selection
+    # Mode selection
+    mode = st.radio(
+        "Select Mode:",
+        options=['strategy', 'manual'],
+        format_func=lambda x: "🎯 Design Strategies" if x == 'strategy' else "🎚️ Manual Sliders"
+    )
+    st.session_state.mode = mode
+    
+    st.divider()
+    
+    # Budget settings
+    st.subheader("Project Configuration")
+    
+    total_budget = st.number_input(
+        "Total Project Budget ($)",
+        min_value=100_000_000,
+        max_value=1_000_000_000,
+        value=st.session_state.total_budget,
+        step=10_000_000,
+        format="%d"
+    )
+    st.session_state.total_budget = total_budget
+    
+    building_area = st.number_input(
+        "Building Area (sq ft)",
+        min_value=100000,
+        max_value=500000,
+        value=st.session_state.building_area,
+        step=10000
+    )
+    st.session_state.building_area = building_area
+    
+    st.metric("Cost per sq ft", f"${total_budget / building_area:.0f}")
+    
+    st.divider()
+    
+    # Mode-specific controls
+    if st.session_state.mode == 'strategy':
         st.subheader("Design Strategies")
         
         selected_strategy = st.radio(
@@ -358,57 +276,85 @@ else:
             options=["none"] + list(STRATEGIES.keys()),
             format_func=lambda x: "Baseline (No Strategy)" if x == "none" else STRATEGIES[x]["name"]
         )
+        st.session_state.selected_strategy = selected_strategy
         
         if selected_strategy != "none":
             st.info(STRATEGIES[selected_strategy]["description"])
-        
-        # Data source attribution
-        st.divider()
-        st.caption("Data Source: Industry averages for healthcare facilities")
-        st.caption("Customizable for project-specific data")
     
-    # Main content
-    tab1, tab2, tab3 = st.tabs(["Visual Comparison", "Detailed Analysis", "Synergies"])
+    # Data source attribution
+    st.divider()
+    st.caption("Data Source: Industry averages for healthcare facilities")
+    st.caption("Customizable for project-specific data")
     
-    with tab1:
-        st.subheader("Cost Impact Visualization")
-        
-        if selected_strategy == "none":
-            base_costs, _ = calculate_costs_with_strategy()
-            fig = create_animated_bar_chart(base_costs, base_costs)
-        else:
-            # Show full effect
-            base_costs, current_costs = calculate_costs_with_strategy(
-                selected_strategy, 
-                len(STRATEGIES[selected_strategy]["click_sequence"]) + 1
+# Main content area - Manual sliders
+if st.session_state.mode == 'manual':
+    st.subheader("🎚️ Manual Cost Adjustments")
+    st.markdown("Adjust each division's budget allocation using the sliders below:")
+    
+    # Create columns for sliders
+    col1, col2 = st.columns(2)
+    
+    divisions = list(CSI_DIVISIONS.keys())
+    for i, div_id in enumerate(divisions):
+        div_info = CSI_DIVISIONS[div_id]
+        with col1 if i % 2 == 0 else col2:
+            # Slider for each division
+            st.session_state.manual_adjustments[div_id] = st.slider(
+                f"{div_info['name']}",
+                min_value=-30,
+                max_value=30,
+                value=int(st.session_state.manual_adjustments[div_id]),
+                step=1,
+                format="%d%%",
+                key=f"manual_slider_{div_id}",
+                help=f"Adjust {div_info['name']} by percentage"
             )
-            fig = create_animated_bar_chart(base_costs, current_costs)
+    
+    # Reset button
+    if st.button("🔄 Reset All Adjustments", type="secondary", use_container_width=True):
+        for div_id in CSI_DIVISIONS.keys():
+            st.session_state.manual_adjustments[div_id] = 0
+        st.rerun()
+
+# Main content tabs
+tab1, tab2, tab3 = st.tabs(["Visual Comparison", "Detailed Analysis", "Synergies"])
+
+with tab1:
+    st.subheader("Cost Impact Visualization")
+    
+    # Calculate costs based on mode
+    if st.session_state.mode == 'manual':
+        base_costs, current_costs = calculate_costs(manual_adjustments=st.session_state.manual_adjustments)
+    else:
+        if st.session_state.selected_strategy == "none":
+            base_costs, current_costs = calculate_costs()
+        else:
+            base_costs, current_costs = calculate_costs(strategy_key=st.session_state.selected_strategy)
+    
+    fig = create_animated_bar_chart(base_costs, current_costs)
         
         st.plotly_chart(fig, use_container_width=True)
         
-        # Summary metrics
-        if selected_strategy != "none":
-            col1, col2, col3 = st.columns(3)
-            
-            total_base = sum(base_costs.values())
-            total_current = sum(current_costs.values())
-            total_change = total_current - total_base
-            
-            with col1:
-                st.metric("Baseline Total", f"${total_base:,.0f}")
-            with col2:
-                st.metric("Optimized Total", f"${total_current:,.0f}")
-            with col3:
-                st.metric("Net Savings", f"${-total_change:,.0f}", f"{-total_change/total_base*100:.1f}%")
-    
-    with tab2:
-        st.subheader("Division-by-Division Analysis")
+    # Summary metrics
+    if st.session_state.mode == 'manual' or st.session_state.selected_strategy != "none":
+        col1, col2, col3 = st.columns(3)
         
-        if selected_strategy != "none":
-            base_costs, current_costs = calculate_costs_with_strategy(
-                selected_strategy,
-                len(STRATEGIES[selected_strategy]["click_sequence"]) + 1
-            )
+        total_base = sum(base_costs.values())
+        total_current = sum(current_costs.values())
+        total_change = total_current - total_base
+        
+        with col1:
+            st.metric("Baseline Total", f"${total_base:,.0f}")
+        with col2:
+            st.metric("Adjusted Total", f"${total_current:,.0f}")
+        with col3:
+            st.metric("Net Change", f"${abs(total_change):,.0f}", f"{-total_change/total_base*100:+.1f}%")
+    
+with tab2:
+    st.subheader("Division-by-Division Analysis")
+    
+    if st.session_state.mode == 'manual' or st.session_state.selected_strategy != "none":
+        # Costs already calculated above
             
             analysis_data = []
             for div_id, div_info in CSI_DIVISIONS.items():
@@ -436,58 +382,58 @@ else:
                         return 'color: red'
                 return ''
             
-            styled_df = df.style.map(highlight_changes, subset=['Change', 'Change %'])
-            st.dataframe(styled_df, use_container_width=True)
-        else:
-            st.info("Select a strategy to see detailed analysis")
+        styled_df = df.style.map(highlight_changes, subset=['Change', 'Change %'])
+        st.dataframe(styled_df, use_container_width=True)
+    else:
+        st.info("Select a strategy or use manual sliders to see detailed analysis")
+
+with tab3:
+    st.subheader("Understanding the Synergies")
     
-    with tab3:
-        st.subheader("Understanding the Synergies")
+    st.markdown("""
+    ### How Integrated Design Creates Value
+    
+    Traditional cost-cutting asks everyone to reduce by 10%, resulting in a worse building.
+    Integrated design finds synergies between systems:
+    
+    **Envelope/Mechanical Strategy:**
+    - 💰 Invest in better envelope insulation
+    - 📉 Reduce HVAC system size and cost
+    - ⚡ Lower electrical loads
+    - 🏥 Better patient comfort
+    
+    **Structural Innovation (Mass Timber):**
+    - 🌲 Premium structural system
+    - 🏗️ Lighter foundations in most conditions
+    - ⏱️ Faster construction
+    - 🏭 Prefabricated components
+    
+    **Waste Heat Recovery:**
+    - ♻️ Capture and reuse thermal energy
+    - 🔧 Additional equipment investment
+    - 💡 Significant electrical savings
+    - 🌡️ Reduced mechanical loads
+    """)
+    
+    if st.session_state.mode == 'strategy' and st.session_state.selected_strategy != "none":
+        st.divider()
+        st.markdown(f"### Current Strategy: {STRATEGIES[st.session_state.selected_strategy]['name']}")
         
-        st.markdown("""
-        ### How Integrated Design Creates Value
+        effects = INTERDEPENDENCY_MATRIX[st.session_state.selected_strategy]
+        increases = [(k, v) for k, v in effects.items() if v > 0]
+        decreases = [(k, v) for k, v in effects.items() if v < 0]
         
-        Traditional cost-cutting asks everyone to reduce by 10%, resulting in a worse building.
-        Integrated design finds synergies between systems:
+        col1, col2 = st.columns(2)
         
-        **Envelope/Mechanical Strategy:**
-        - 💰 Invest in better envelope insulation
-        - 📉 Reduce HVAC system size and cost
-        - ⚡ Lower electrical loads
-        - 🏥 Better patient comfort
+        with col1:
+            st.markdown("#### Investments")
+            for div, change in increases:
+                st.markdown(f"- {CSI_DIVISIONS[div]['name']}: +{change}%")
         
-        **Structural Innovation (Mass Timber):**
-        - 🌲 Premium structural system
-        - 🏗️ Lighter foundations in most conditions
-        - ⏱️ Faster construction
-        - 🏭 Prefabricated components
-        
-        **Waste Heat Recovery:**
-        - ♻️ Capture and reuse thermal energy
-        - 🔧 Additional equipment investment
-        - 💡 Significant electrical savings
-        - 🌡️ Reduced mechanical loads
-        """)
-        
-        if selected_strategy != "none":
-            st.divider()
-            st.markdown(f"### Current Strategy: {STRATEGIES[selected_strategy]['name']}")
-            
-            effects = INTERDEPENDENCY_MATRIX[selected_strategy]
-            increases = [(k, v) for k, v in effects.items() if v > 0]
-            decreases = [(k, v) for k, v in effects.items() if v < 0]
-            
-            col1, col2 = st.columns(2)
-            
-            with col1:
-                st.markdown("#### Investments")
-                for div, change in increases:
-                    st.markdown(f"- {CSI_DIVISIONS[div]['name']}: +{change}%")
-            
-            with col2:
-                st.markdown("#### Savings")
-                for div, change in decreases:
-                    st.markdown(f"- {CSI_DIVISIONS[div]['name']}: {change}%")
+        with col2:
+            st.markdown("#### Savings")
+            for div, change in decreases:
+                st.markdown(f"- {CSI_DIVISIONS[div]['name']}: {change}%")
 
 # Footer
 st.markdown("---")
@@ -495,17 +441,12 @@ st.markdown("Built for integrated healthcare design decisions • Supporting sus
 st.markdown("_Last updated: " + datetime.now().strftime("%Y-%m-%d %H:%M") + "_")
 
 # Export functionality
-if not st.session_state.presentation_mode:
-    with st.expander("Export Options"):
+with st.expander("Export Options"):
         col1, col2 = st.columns(2)
         
         with col1:
             if st.button("📊 Export Current Data"):
-                if selected_strategy != "none":
-                    base_costs, current_costs = calculate_costs_with_strategy(
-                        selected_strategy,
-                        len(STRATEGIES[selected_strategy]["click_sequence"]) + 1
-                    )
+                # Use the costs already calculated above
                     
                     export_data = []
                     for div_id, div_info in CSI_DIVISIONS.items():
