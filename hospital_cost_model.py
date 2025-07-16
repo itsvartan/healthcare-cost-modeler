@@ -15,13 +15,28 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Custom CSS for smooth transitions and presentation mode
+# Custom CSS for smooth transitions and scrolling control
 st.markdown("""
 <style>
-    /* Dark mode for presentations */
-    .presentation-mode {
-        background-color: #1a1a1a;
-        color: white;
+    /* Make sidebar scrollable */
+    section[data-testid="stSidebar"] {
+        height: 100vh;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+    
+    /* Prevent main content from scrolling */
+    .main .block-container {
+        max-height: calc(100vh - 100px);
+        overflow: hidden;
+        padding-top: 2rem;
+        padding-bottom: 1rem;
+    }
+    
+    /* Make tab content fit within viewport */
+    .stTabs [data-baseweb="tab-panel"] {
+        height: calc(100vh - 320px);
+        overflow-y: auto;
     }
     
     /* Smooth transitions for all elements */
@@ -49,23 +64,9 @@ st.markdown("""
         animation: slideIn 0.5s ease-out;
     }
     
-    /* Progress bar style */
-    .stProgress > div > div {
-        background-color: #2ecc71;
-        transition: width 0.5s ease-in-out;
-    }
-    
-    /* Remove radial fade backgrounds */
-    .js-plotly-plot .plotly {
-        background: transparent !important;
-    }
-    
-    /* Presentation controls */
-    .presentation-controls {
-        position: fixed;
-        bottom: 20px;
-        right: 20px;
-        z-index: 999;
+    /* Remove Streamlit padding */
+    .main > div {
+        padding-top: 0;
     }
 </style>
 """, unsafe_allow_html=True)
