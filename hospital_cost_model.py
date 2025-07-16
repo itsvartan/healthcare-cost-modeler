@@ -226,6 +226,40 @@ def create_animated_bar_chart(base_costs, current_costs, highlight_division=None
 # Main App
 st.markdown("### Hospital Construction Cost Modeling Tool")
 
+# Project Configuration - Horizontal layout
+with st.container():
+    col1, col2, col3 = st.columns(3)
+    
+    with col1:
+        st.session_state.total_budget = st.number_input(
+            "Total Project Budget ($)",
+            min_value=100_000_000,
+            max_value=1_000_000_000,
+            value=st.session_state.total_budget,
+            step=10_000_000,
+            format="%d",
+            label_visibility="visible"
+        )
+    
+    with col2:
+        st.session_state.building_area = st.number_input(
+            "Building Area (sq ft)",
+            min_value=100000,
+            max_value=500000,
+            value=st.session_state.building_area,
+            step=10000,
+            label_visibility="visible"
+        )
+    
+    with col3:
+        st.metric(
+            "Cost per sq ft", 
+            f"${st.session_state.total_budget / st.session_state.building_area:.0f}",
+            label_visibility="visible"
+        )
+
+st.divider()
+
 # Sidebar
 with st.sidebar:
     st.header("Settings")
@@ -276,32 +310,6 @@ with st.sidebar:
             for div_id in CSI_DIVISIONS.keys():
                 st.session_state.manual_adjustments[div_id] = 0
             st.rerun()
-    
-    st.divider()
-    
-    # Budget settings (moved down to be third)
-    st.subheader("Project Configuration")
-    
-    total_budget = st.number_input(
-        "Total Project Budget ($)",
-        min_value=100_000_000,
-        max_value=1_000_000_000,
-        value=st.session_state.total_budget,
-        step=10_000_000,
-        format="%d"
-    )
-    st.session_state.total_budget = total_budget
-    
-    building_area = st.number_input(
-        "Building Area (sq ft)",
-        min_value=100000,
-        max_value=500000,
-        value=st.session_state.building_area,
-        step=10000
-    )
-    st.session_state.building_area = building_area
-    
-    st.metric("Cost per sq ft", f"${total_budget / building_area:.0f}")
     
     # Data source attribution
     st.divider()
