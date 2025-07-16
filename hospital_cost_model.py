@@ -241,33 +241,7 @@ with st.sidebar:
     
     st.divider()
     
-    # Budget settings
-    st.subheader("Project Configuration")
-    
-    total_budget = st.number_input(
-        "Total Project Budget ($)",
-        min_value=100_000_000,
-        max_value=1_000_000_000,
-        value=st.session_state.total_budget,
-        step=10_000_000,
-        format="%d"
-    )
-    st.session_state.total_budget = total_budget
-    
-    building_area = st.number_input(
-        "Building Area (sq ft)",
-        min_value=100000,
-        max_value=500000,
-        value=st.session_state.building_area,
-        step=10000
-    )
-    st.session_state.building_area = building_area
-    
-    st.metric("Cost per sq ft", f"${total_budget / building_area:.0f}")
-    
-    st.divider()
-    
-    # Mode-specific controls
+    # Mode-specific controls (moved up to be second)
     if st.session_state.mode == 'strategy':
         st.subheader("Design Strategies")
         
@@ -297,13 +271,37 @@ with st.sidebar:
                 key=f"sidebar_slider_{div_id}"
             )
         
-        st.divider()
-        
         # Reset button
         if st.button("🔄 Reset All", type="secondary", use_container_width=True):
             for div_id in CSI_DIVISIONS.keys():
                 st.session_state.manual_adjustments[div_id] = 0
             st.rerun()
+    
+    st.divider()
+    
+    # Budget settings (moved down to be third)
+    st.subheader("Project Configuration")
+    
+    total_budget = st.number_input(
+        "Total Project Budget ($)",
+        min_value=100_000_000,
+        max_value=1_000_000_000,
+        value=st.session_state.total_budget,
+        step=10_000_000,
+        format="%d"
+    )
+    st.session_state.total_budget = total_budget
+    
+    building_area = st.number_input(
+        "Building Area (sq ft)",
+        min_value=100000,
+        max_value=500000,
+        value=st.session_state.building_area,
+        step=10000
+    )
+    st.session_state.building_area = building_area
+    
+    st.metric("Cost per sq ft", f"${total_budget / building_area:.0f}")
     
     # Data source attribution
     st.divider()
