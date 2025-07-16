@@ -354,33 +354,33 @@ with tab2:
     
     if st.session_state.mode == 'manual' or st.session_state.selected_strategy != "none":
         # Costs already calculated above
+        
+        analysis_data = []
+        for div_id, div_info in CSI_DIVISIONS.items():
+            base = base_costs[div_id]
+            current = current_costs[div_id]
+            change = current - base
+            change_pct = (change / base * 100) if base > 0 else 0
             
-            analysis_data = []
-            for div_id, div_info in CSI_DIVISIONS.items():
-                base = base_costs[div_id]
-                current = current_costs[div_id]
-                change = current - base
-                change_pct = (change / base * 100) if base > 0 else 0
-                
-                analysis_data.append({
-                    "Division": div_info["name"],
-                    "Baseline": f"${base:,.0f}",
-                    "Optimized": f"${current:,.0f}",
-                    "Change": f"${change:+,.0f}",
-                    "Change %": f"{change_pct:+.1f}%"
-                })
-            
-            df = pd.DataFrame(analysis_data)
-            
-            # Style the dataframe
-            def highlight_changes(val):
-                if isinstance(val, str) and '$' in val and ('+' in val or '-' in val):
-                    if '-' in val and val != '$-0':
-                        return 'color: green'
-                    elif '+' in val:
-                        return 'color: red'
-                return ''
-            
+            analysis_data.append({
+                "Division": div_info["name"],
+                "Baseline": f"${base:,.0f}",
+                "Optimized": f"${current:,.0f}",
+                "Change": f"${change:+,.0f}",
+                "Change %": f"{change_pct:+.1f}%"
+            })
+        
+        df = pd.DataFrame(analysis_data)
+        
+        # Style the dataframe
+        def highlight_changes(val):
+            if isinstance(val, str) and '$' in val and ('+' in val or '-' in val):
+                if '-' in val and val != '$-0':
+                    return 'color: green'
+                elif '+' in val:
+                    return 'color: red'
+            return ''
+        
         styled_df = df.style.map(highlight_changes, subset=['Change', 'Change %'])
         st.dataframe(styled_df, use_container_width=True)
     else:
