@@ -252,11 +252,24 @@ with st.container():
         )
     
     with col3:
-        st.metric(
-            "Cost per sq ft", 
-            f"${st.session_state.total_budget / st.session_state.building_area:.0f}",
-            label_visibility="visible"
+        # Calculate current cost per sq ft
+        current_cost_psf = st.session_state.total_budget / st.session_state.building_area
+        
+        # Make cost per sq ft adjustable
+        new_cost_psf = st.number_input(
+            "Cost per sq ft ($)",
+            min_value=100,
+            max_value=5000,
+            value=int(current_cost_psf),
+            step=50,
+            format="%d",
+            label_visibility="visible",
+            key="cost_psf_input"
         )
+        
+        # Update total budget if cost per sq ft changed
+        if new_cost_psf != int(current_cost_psf):
+            st.session_state.total_budget = new_cost_psf * st.session_state.building_area
 
 st.divider()
 
