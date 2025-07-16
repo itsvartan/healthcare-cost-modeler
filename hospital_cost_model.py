@@ -15,7 +15,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Custom CSS for responsive layout and smooth transitions
+# Custom CSS for fixed main content like Claude's interface
 st.markdown("""
 <style>
     /* Smooth transitions for all elements */
@@ -23,84 +23,79 @@ st.markdown("""
         transition: all 0.5s ease-in-out;
     }
     
-    .element-container {
-        transition: all 0.3s ease-in-out;
-    }
-    
-    /* Animation for bars */
-    @keyframes slideIn {
-        from {
-            transform: translateY(20px);
-            opacity: 0;
-        }
-        to {
-            transform: translateY(0);
-            opacity: 1;
-        }
-    }
-    
-    .animated-bar {
-        animation: slideIn 0.5s ease-out;
-    }
-    
-    /* Responsive layout for tablets and above (768px+) */
+    /* For tablets and above - fixed layout like Claude */
     @media (min-width: 768px) {
-        /* Make sidebar always scrollable */
-        section[data-testid="stSidebar"] {
-            height: 100vh;
-            overflow-y: auto;
-            overflow-x: hidden;
-            position: sticky;
-            top: 0;
+        /* Fix the entire viewport */
+        html, body {
+            overflow: hidden !important;
+            height: 100vh !important;
+            margin: 0 !important;
         }
         
-        /* Fix main content on larger screens */
+        /* Main app container */
+        .stApp {
+            overflow: hidden !important;
+            height: 100vh !important;
+        }
+        
+        /* Fix main content area completely */
+        [data-testid="stAppViewContainer"] {
+            overflow: hidden !important;
+            height: 100vh !important;
+        }
+        
         .main {
-            height: 100vh;
-            overflow: hidden;
+            overflow: hidden !important;
+            height: 100vh !important;
+            position: fixed !important;
+            width: calc(100% - var(--sidebar-width, 21rem)) !important;
+            left: var(--sidebar-width, 21rem) !important;
         }
         
         .main .block-container {
-            height: 100vh;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
+            overflow: hidden !important;
+            height: 100vh !important;
+            max-height: 100vh !important;
+            padding-top: 2rem;
             padding-bottom: 2rem;
         }
         
-        /* Make tabs section flexible and contained */
-        .stTabs {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            min-height: 0;
+        /* Sidebar scrollable */
+        section[data-testid="stSidebar"] {
+            height: 100vh !important;
+            overflow-y: auto !important;
+            overflow-x: hidden !important;
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: var(--sidebar-width, 21rem) !important;
         }
         
-        .stTabs [data-baseweb="tab-list"] {
-            flex-shrink: 0;
-        }
-        
+        /* Tab content scrollable within fixed container */
         .stTabs [data-baseweb="tab-panel"] {
-            flex: 1;
+            max-height: calc(100vh - 380px);
             overflow-y: auto;
-            min-height: 0;
+            overflow-x: hidden;
         }
         
-        /* Responsive chart height */
+        /* Chart responsive height */
         .js-plotly-plot {
-            height: 100% !important;
-            max-height: calc(100vh - 400px);
+            max-height: calc(100vh - 420px) !important;
+        }
+        
+        /* Hide any scrollbars on main */
+        .main::-webkit-scrollbar {
+            display: none;
+        }
+        
+        .main {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
         }
     }
     
-    /* Mobile and small tablets - allow scrolling */
+    /* Mobile - normal scrolling */
     @media (max-width: 767px) {
-        /* Default scrolling behavior on mobile */
-        section[data-testid="stSidebar"] {
-            position: relative;
-        }
-        
-        /* Smaller chart on mobile */
         .js-plotly-plot {
             height: 400px !important;
         }
@@ -247,7 +242,7 @@ def create_animated_bar_chart(base_costs, current_costs, highlight_division=None
         },
         xaxis_title="CSI Division",
         yaxis_title="Cost (Millions $)",
-        height=600,
+        height=500,
         xaxis={'tickangle': -45},
         plot_bgcolor='rgba(0,0,0,0)',
         paper_bgcolor='rgba(0,0,0,0)',
