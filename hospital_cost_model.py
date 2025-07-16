@@ -492,6 +492,7 @@ else:
 # Footer
 st.markdown("---")
 st.markdown("Built for integrated healthcare design decisions • Supporting sustainable value engineering")
+st.markdown("_Last updated: " + datetime.now().strftime("%Y-%m-%d %H:%M") + "_")
 
 # Export functionality
 if not st.session_state.presentation_mode:
