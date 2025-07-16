@@ -224,7 +224,7 @@ def create_animated_bar_chart(base_costs, current_costs, highlight_division=None
     return fig
 
 # Main App
-st.title("🏥 Hospital Construction Cost Modeling Tool")
+st.markdown("### Hospital Construction Cost Modeling Tool")
 
 # Sidebar
 with st.sidebar:
