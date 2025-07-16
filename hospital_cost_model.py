@@ -332,9 +332,8 @@ with tab1:
             base_costs, current_costs = calculate_costs(strategy_key=st.session_state.selected_strategy)
     
     fig = create_animated_bar_chart(base_costs, current_costs)
-        
-        st.plotly_chart(fig, use_container_width=True)
-        
+    st.plotly_chart(fig, use_container_width=True)
+    
     # Summary metrics
     if st.session_state.mode == 'manual' or st.session_state.selected_strategy != "none":
         col1, col2, col3 = st.columns(3)
