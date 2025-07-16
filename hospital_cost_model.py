@@ -268,14 +268,12 @@ def create_modern_bar_chart(base_costs, current_costs):
         text=[f"${v:.1f}M<br>{c:+.1f}%" if c != 0 else f"${v:.1f}M" 
               for v, c in zip(current_values, changes)],
         textposition="outside",
-        textfont=dict(size=12, family="-apple-system, Inter")
+        textfont=dict(size=12)
     ))
     
     # Apple-style layout
     fig.update_layout(
-        title=None,
         xaxis=dict(
-            title=None,
             tickangle=-45,
             tickfont=dict(size=12, color='#1D1D1F'),
             gridcolor='rgba(0,0,0,0.05)',
@@ -296,7 +294,6 @@ def create_modern_bar_chart(base_costs, current_costs):
         hoverlabel=dict(
             bgcolor="white",
             font_size=14,
-            font_family="-apple-system, Inter",
             bordercolor="rgba(0,0,0,0.1)"
         )
     )
@@ -324,7 +321,7 @@ def create_donut_chart(base_costs, current_costs):
         ),
         textinfo='label+percent',
         textposition='outside',
-        textfont=dict(size=12, family="-apple-system, Inter")
+        textfont=dict(size=12)
     )])
     
     # Add center text
@@ -332,7 +329,7 @@ def create_donut_chart(base_costs, current_costs):
     fig.add_annotation(
         text=f"${total:.0f}M<br>Total",
         x=0.5, y=0.5,
-        font=dict(size=24, family="-apple-system, Inter", color="#1D1D1F"),
+        font=dict(size=24, color="#1D1D1F"),
         showarrow=False
     )
     
