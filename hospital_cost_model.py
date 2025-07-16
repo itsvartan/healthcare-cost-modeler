@@ -141,7 +141,7 @@ if 'total_budget' not in st.session_state:
 if 'manual_adjustments' not in st.session_state:
     st.session_state.manual_adjustments = {div: 0 for div in CSI_DIVISIONS.keys()}
 if 'mode' not in st.session_state:
-    st.session_state.mode = 'strategy'  # 'strategy' or 'manual'
+    st.session_state.mode = 'manual'  # 'strategy' or 'manual'
 
 # Helper functions
 def calculate_costs(strategy_key=None, manual_adjustments=None):
@@ -225,7 +225,6 @@ def create_animated_bar_chart(base_costs, current_costs, highlight_division=None
 
 # Main App
 st.title("🏥 Hospital Construction Cost Modeling Tool")
-st.markdown("Interactive tool for demonstrating integrated design cost strategies")
 
 # Sidebar
 with st.sidebar:
@@ -325,23 +324,23 @@ with tab1:
         else:
             base_costs, current_costs = calculate_costs(strategy_key=st.session_state.selected_strategy)
     
+    # Summary metrics at the top
+    col1, col2, col3 = st.columns(3)
+    
+    total_base = sum(base_costs.values())
+    total_current = sum(current_costs.values())
+    total_change = total_current - total_base
+    
+    with col1:
+        st.metric("Baseline Total", f"${total_base:,.0f}")
+    with col2:
+        st.metric("Adjusted Total", f"${total_current:,.0f}")
+    with col3:
+        st.metric("Net Change", f"${abs(total_change):,.0f}", f"{-total_change/total_base*100:+.1f}%")
+    
+    # Chart below metrics
     fig = create_animated_bar_chart(base_costs, current_costs)
     st.plotly_chart(fig, use_container_width=True)
-    
-    # Summary metrics
-    if st.session_state.mode == 'manual' or st.session_state.selected_strategy != "none":
-        col1, col2, col3 = st.columns(3)
-        
-        total_base = sum(base_costs.values())
-        total_current = sum(current_costs.values())
-        total_change = total_current - total_base
-        
-        with col1:
-            st.metric("Baseline Total", f"${total_base:,.0f}")
-        with col2:
-            st.metric("Adjusted Total", f"${total_current:,.0f}")
-        with col3:
-            st.metric("Net Change", f"${abs(total_change):,.0f}", f"{-total_change/total_base*100:+.1f}%")
     
 with tab2:
     st.subheader("Division-by-Division Analysis")
