@@ -1,0 +1,121 @@
+/* Custom styles for the cost modeling tool */
+
+.presentation-mode {
+    background-color: #f8f9fa;
+    min-height: 100vh;
+}
+
+.presentation-content {
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Slider customization */
+.rc-slider-track {
+    background-color: #007bff;
+}
+
+.rc-slider-handle {
+    border-color: #007bff;
+}
+
+.rc-slider-handle:hover {
+    border-color: #0056b3;
+}
+
+/* Card styling */
+.card {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: box-shadow 0.3s ease;
+}
+
+.card:hover {
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+/* Export button styling */
+.btn-group .btn {
+    margin: 0 0.25rem;
+}
+
+/* Trade-off indicators */
+.text-success {
+    color: #28a745 !important;
+}
+
+.text-danger {
+    color: #dc3545 !important;
+}
+
+/* Presentation mode specific */
+.presentation-mode .navbar {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.presentation-mode .slide {
+    animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .presentation-content {
+        padding: 1rem;
+    }
+    
+    .card-body {
+        padding: 1rem;
+    }
+}
+
+/* Print styles */
+@media print {
+    .btn-group,
+    .navbar,
+    .fixed-bottom {
+        display: none !important;
+    }
+    
+    .presentation-content {
+        padding: 0;
+    }
+}
+
+/* Chart container styling */
+.chart-container {
+    position: relative;
+    height: 500px;
+    width: 100%;
+}
+
+/* Loading spinner */
+.spinner-border {
+    width: 3rem;
+    height: 3rem;
+    border-width: 0.3rem;
+}
+
+/* Delta indicators */
+.delta-positive {
+    color: #28a745;
+    font-weight: 600;
+}
+
+.delta-negative {
+    color: #dc3545;
+    font-weight: 600;
+}
+
+/* Annotation styling */
+.annotation-box {
+    background-color: #fff3cd;
+    border: 1px solid #ffeaa7;
+    border-radius: 4px;
+    padding: 0.5rem 1rem;
+    margin: 1rem 0;
+}

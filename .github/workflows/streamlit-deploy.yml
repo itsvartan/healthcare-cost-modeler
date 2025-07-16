@@ -1,0 +1,10 @@
+name: Streamlit Auto-Deploy
+on:
+  push:
+    branches: [main]
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deployment triggered
+        run: echo "Streamlit will auto-deploy your changes!"
