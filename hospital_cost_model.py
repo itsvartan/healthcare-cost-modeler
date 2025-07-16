@@ -330,10 +330,9 @@ with st.sidebar:
     st.caption("Customizable for project-specific data")
     
 # Main content tabs
-tab1, tab2, tab3 = st.tabs(["Visual Comparison", "Detailed Analysis", "Synergies"])
+tab1, tab2 = st.tabs(["Visual Comparison", "Detailed Analysis"])
 
 with tab1:
-    st.subheader("Cost Impact Visualization")
     
     # Calculate costs based on mode
     if st.session_state.mode == 'manual':
@@ -399,58 +398,7 @@ with tab2:
     else:
         st.info("Select a strategy or use manual sliders to see detailed analysis")
 
-with tab3:
-    st.subheader("Understanding the Synergies")
-    
-    st.markdown("""
-    ### How Integrated Design Creates Value
-    
-    Traditional cost-cutting asks everyone to reduce by 10%, resulting in a worse building.
-    Integrated design finds synergies between systems:
-    
-    **Envelope/Mechanical Strategy:**
-    - 💰 Invest in better envelope insulation
-    - 📉 Reduce HVAC system size and cost
-    - ⚡ Lower electrical loads
-    - 🏥 Better patient comfort
-    
-    **Structural Innovation (Mass Timber):**
-    - 🌲 Premium structural system
-    - 🏗️ Lighter foundations in most conditions
-    - ⏱️ Faster construction
-    - 🏭 Prefabricated components
-    
-    **Waste Heat Recovery:**
-    - ♻️ Capture and reuse thermal energy
-    - 🔧 Additional equipment investment
-    - 💡 Significant electrical savings
-    - 🌡️ Reduced mechanical loads
-    """)
-    
-    if st.session_state.mode == 'strategy' and st.session_state.selected_strategy != "none":
-        st.divider()
-        st.markdown(f"### Current Strategy: {STRATEGIES[st.session_state.selected_strategy]['name']}")
-        
-        effects = INTERDEPENDENCY_MATRIX[st.session_state.selected_strategy]
-        increases = [(k, v) for k, v in effects.items() if v > 0]
-        decreases = [(k, v) for k, v in effects.items() if v < 0]
-        
-        col1, col2 = st.columns(2)
-        
-        with col1:
-            st.markdown("#### Investments")
-            for div, change in increases:
-                st.markdown(f"- {CSI_DIVISIONS[div]['name']}: +{change}%")
-        
-        with col2:
-            st.markdown("#### Savings")
-            for div, change in decreases:
-                st.markdown(f"- {CSI_DIVISIONS[div]['name']}: {change}%")
 
-# Footer
-st.markdown("---")
-st.markdown("Built for integrated healthcare design decisions • Supporting sustainable value engineering")
-st.markdown("_Last updated: " + datetime.now().strftime("%Y-%m-%d %H:%M") + "_")
 
 # Export functionality
 with st.expander("Export Options"):
