@@ -234,7 +234,8 @@ with st.sidebar:
     mode = st.radio(
         "Select Mode:",
         options=['strategy', 'manual'],
-        format_func=lambda x: "🎯 Design Strategies" if x == 'strategy' else "🎚️ Manual Sliders"
+        format_func=lambda x: "🎯 Design Strategies" if x == 'strategy' else "🎚️ Manual Sliders",
+        index=1 if st.session_state.mode == 'manual' else 0
     )
     st.session_state.mode = mode
     
