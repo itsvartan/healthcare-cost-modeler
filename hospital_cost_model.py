@@ -15,7 +15,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Custom CSS for fixed main content like Claude's interface
+# Custom CSS - Simple approach for better compatibility
 st.markdown("""
 <style>
     /* Smooth transitions for all elements */
@@ -23,103 +23,36 @@ st.markdown("""
         transition: all 0.5s ease-in-out;
     }
     
-    /* For tablets and above - fixed layout like Claude */
-    @media (min-width: 768px) {
-        /* Fix the entire viewport */
-        html, body {
-            overflow: hidden !important;
-            height: 100vh !important;
-            margin: 0 !important;
-        }
-        
-        /* Main app container */
-        .stApp {
-            overflow: hidden !important;
-            height: 100vh !important;
-        }
-        
-        /* Fix main content area completely */
-        [data-testid="stAppViewContainer"] {
-            overflow: hidden !important;
-            height: 100vh !important;
-        }
-        
-        .main {
-            overflow: hidden !important;
-            height: 100vh !important;
-            position: relative !important;
-        }
-        
-        .main .block-container {
-            overflow: hidden !important;
-            height: 100vh !important;
-            max-height: 100vh !important;
-            padding-top: 1rem;
-            padding-bottom: 1rem;
-            padding-left: 2rem;
-            padding-right: 2rem;
-        }
-        
-        /* Sidebar scrollable */
-        section[data-testid="stSidebar"] {
-            height: 100vh !important;
-            overflow-y: auto !important;
-            overflow-x: hidden !important;
-            position: fixed !important;
-            top: 0 !important;
-            left: 0 !important;
-            width: var(--sidebar-width, 21rem) !important;
-        }
-        
-        /* Tab content scrollable within fixed container */
-        .stTabs [data-baseweb="tab-panel"] {
-            max-height: calc(100vh - 300px);
-            overflow-y: auto;
-            overflow-x: hidden;
-        }
-        
-        /* Chart responsive height */
-        .js-plotly-plot {
-            max-height: calc(100vh - 350px) !important;
-        }
-        
-        /* Compact metrics */
-        [data-testid="metric-container"] {
-            padding: 0.5rem 1rem;
-        }
-        
-        /* Smaller title */
-        h3 {
-            font-size: 1.2rem !important;
-            margin-bottom: 0.5rem !important;
-        }
-        
-        /* Compact number inputs */
-        .stNumberInput {
-            margin-bottom: 0.5rem;
-        }
-        
-        /* Reduce divider spacing */
-        .stDivider {
-            margin: 0.5rem 0;
-        }
-        
-        /* Hide any scrollbars on main */
-        .main::-webkit-scrollbar {
-            display: none;
-        }
-        
-        .main {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
+    /* Make everything more compact */
+    .main .block-container {
+        padding-top: 1rem;
+        padding-bottom: 1rem;
+        max-width: 100%;
     }
     
-    /* Mobile - normal scrolling */
-    @media (max-width: 767px) {
-        .js-plotly-plot {
-            height: 400px !important;
-        }
+    /* Reduce spacing */
+    .stNumberInput {
+        margin-bottom: 0.5rem;
+    }
+    
+    [data-testid="metric-container"] {
+        padding: 0.5rem 1rem;
+    }
+    
+    /* Smaller headers */
+    h4 {
+        font-size: 1.1rem !important;
+        margin-bottom: 0.5rem !important;
+    }
+    
+    /* Compact tabs */
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 0.5rem;
+    }
+    
+    /* Sidebar always scrollable */
+    section[data-testid="stSidebar"] {
+        overflow-y: auto;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -259,11 +192,11 @@ def create_animated_bar_chart(base_costs, current_costs, highlight_division=None
     fig.update_layout(
         title={
             'text': "Hospital Construction Cost by Division",
-            'font': {'size': 24}
+            'font': {'size': 18}
         },
         xaxis_title="CSI Division",
         yaxis_title="Cost (Millions $)",
-        height=380,
+        height=350,
         xaxis={'tickangle': -45},
         plot_bgcolor='rgba(0,0,0,0)',
         paper_bgcolor='rgba(0,0,0,0)',
