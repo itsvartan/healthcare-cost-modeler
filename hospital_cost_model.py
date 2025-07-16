@@ -436,7 +436,7 @@ else:
                         return 'color: red'
                 return ''
             
-            styled_df = df.style.applymap(highlight_changes, subset=['Change', 'Change %'])
+            styled_df = df.style.map(highlight_changes, subset=['Change', 'Change %'])
             st.dataframe(styled_df, use_container_width=True)
         else:
             st.info("Select a strategy to see detailed analysis")
