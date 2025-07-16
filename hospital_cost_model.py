@@ -281,24 +281,12 @@ with st.sidebar:
         if selected_strategy != "none":
             st.info(STRATEGIES[selected_strategy]["description"])
     
-    # Data source attribution
-    st.divider()
-    st.caption("Data Source: Industry averages for healthcare facilities")
-    st.caption("Customizable for project-specific data")
-    
-# Main content area - Manual sliders
-if st.session_state.mode == 'manual':
-    st.subheader("🎚️ Manual Cost Adjustments")
-    st.markdown("Adjust each division's budget allocation using the sliders below:")
-    
-    # Create columns for sliders
-    col1, col2 = st.columns(2)
-    
-    divisions = list(CSI_DIVISIONS.keys())
-    for i, div_id in enumerate(divisions):
-        div_info = CSI_DIVISIONS[div_id]
-        with col1 if i % 2 == 0 else col2:
-            # Slider for each division
+    else:  # Manual mode
+        st.subheader("🎚️ Manual Adjustments")
+        st.caption("Adjust each division's budget:")
+        
+        # Create sliders in sidebar
+        for div_id, div_info in CSI_DIVISIONS.items():
             st.session_state.manual_adjustments[div_id] = st.slider(
                 f"{div_info['name']}",
                 min_value=-30,
@@ -306,16 +294,22 @@ if st.session_state.mode == 'manual':
                 value=int(st.session_state.manual_adjustments[div_id]),
                 step=1,
                 format="%d%%",
-                key=f"manual_slider_{div_id}",
-                help=f"Adjust {div_info['name']} by percentage"
+                key=f"sidebar_slider_{div_id}"
             )
+        
+        st.divider()
+        
+        # Reset button
+        if st.button("🔄 Reset All", type="secondary", use_container_width=True):
+            for div_id in CSI_DIVISIONS.keys():
+                st.session_state.manual_adjustments[div_id] = 0
+            st.rerun()
     
-    # Reset button
-    if st.button("🔄 Reset All Adjustments", type="secondary", use_container_width=True):
-        for div_id in CSI_DIVISIONS.keys():
-            st.session_state.manual_adjustments[div_id] = 0
-        st.rerun()
-
+    # Data source attribution
+    st.divider()
+    st.caption("Data Source: Industry averages for healthcare facilities")
+    st.caption("Customizable for project-specific data")
+    
 # Main content tabs
 tab1, tab2, tab3 = st.tabs(["Visual Comparison", "Detailed Analysis", "Synergies"])
 
