@@ -15,7 +15,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Custom CSS for smooth transitions
+# Custom CSS for responsive layout and smooth transitions
 st.markdown("""
 <style>
     /* Smooth transitions for all elements */
@@ -41,6 +41,69 @@ st.markdown("""
     
     .animated-bar {
         animation: slideIn 0.5s ease-out;
+    }
+    
+    /* Responsive layout for tablets and above (768px+) */
+    @media (min-width: 768px) {
+        /* Make sidebar always scrollable */
+        section[data-testid="stSidebar"] {
+            height: 100vh;
+            overflow-y: auto;
+            overflow-x: hidden;
+            position: sticky;
+            top: 0;
+        }
+        
+        /* Fix main content on larger screens */
+        .main {
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        .main .block-container {
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            padding-bottom: 2rem;
+        }
+        
+        /* Make tabs section flexible and contained */
+        .stTabs {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+        
+        .stTabs [data-baseweb="tab-list"] {
+            flex-shrink: 0;
+        }
+        
+        .stTabs [data-baseweb="tab-panel"] {
+            flex: 1;
+            overflow-y: auto;
+            min-height: 0;
+        }
+        
+        /* Responsive chart height */
+        .js-plotly-plot {
+            height: 100% !important;
+            max-height: calc(100vh - 400px);
+        }
+    }
+    
+    /* Mobile and small tablets - allow scrolling */
+    @media (max-width: 767px) {
+        /* Default scrolling behavior on mobile */
+        section[data-testid="stSidebar"] {
+            position: relative;
+        }
+        
+        /* Smaller chart on mobile */
+        .js-plotly-plot {
+            height: 400px !important;
+        }
     }
 </style>
 """, unsafe_allow_html=True)
