@@ -15,51 +15,9 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Custom CSS for smooth transitions and scrolling control
+# Custom CSS for smooth transitions
 st.markdown("""
 <style>
-    /* Make sidebar scrollable */
-    section[data-testid="stSidebar"] {
-        height: 100vh;
-        overflow-y: auto;
-        overflow-x: hidden;
-    }
-    
-    /* Fix main content - prevent scrolling */
-    .main {
-        overflow: hidden;
-        max-height: 100vh;
-    }
-    
-    .main .block-container {
-        max-height: 100vh;
-        overflow: hidden;
-        padding-top: 1rem;
-        padding-bottom: 0;
-    }
-    
-    /* Adjust Streamlit's default main container */
-    [data-testid="stAppViewContainer"] {
-        overflow: hidden;
-    }
-    
-    .stApp {
-        overflow: hidden;
-        height: 100vh;
-    }
-    
-    /* Make tab content fit within viewport without scroll */
-    .stTabs [data-baseweb="tab-panel"] {
-        height: calc(100vh - 350px);
-        overflow-y: auto;
-        overflow-x: hidden;
-    }
-    
-    /* Adjust chart container height */
-    .js-plotly-plot {
-        height: calc(100vh - 450px) !important;
-    }
-    
     /* Smooth transitions for all elements */
     .stSlider > div > div {
         transition: all 0.5s ease-in-out;
@@ -69,14 +27,20 @@ st.markdown("""
         transition: all 0.3s ease-in-out;
     }
     
-    /* Remove unnecessary padding */
-    .main > div {
-        padding-top: 0;
+    /* Animation for bars */
+    @keyframes slideIn {
+        from {
+            transform: translateY(20px);
+            opacity: 0;
+        }
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
     }
     
-    /* Hide Streamlit footer */
-    footer {
-        display: none;
+    .animated-bar {
+        animation: slideIn 0.5s ease-out;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -220,7 +184,7 @@ def create_animated_bar_chart(base_costs, current_costs, highlight_division=None
         },
         xaxis_title="CSI Division",
         yaxis_title="Cost (Millions $)",
-        height=400,
+        height=600,
         xaxis={'tickangle': -45},
         plot_bgcolor='rgba(0,0,0,0)',
         paper_bgcolor='rgba(0,0,0,0)',
