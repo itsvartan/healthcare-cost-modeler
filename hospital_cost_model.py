@@ -25,18 +25,39 @@ st.markdown("""
         overflow-x: hidden;
     }
     
-    /* Prevent main content from scrolling */
-    .main .block-container {
-        max-height: calc(100vh - 100px);
+    /* Fix main content - prevent scrolling */
+    .main {
         overflow: hidden;
-        padding-top: 2rem;
-        padding-bottom: 1rem;
+        max-height: 100vh;
     }
     
-    /* Make tab content fit within viewport */
+    .main .block-container {
+        max-height: 100vh;
+        overflow: hidden;
+        padding-top: 1rem;
+        padding-bottom: 0;
+    }
+    
+    /* Adjust Streamlit's default main container */
+    [data-testid="stAppViewContainer"] {
+        overflow: hidden;
+    }
+    
+    .stApp {
+        overflow: hidden;
+        height: 100vh;
+    }
+    
+    /* Make tab content fit within viewport without scroll */
     .stTabs [data-baseweb="tab-panel"] {
-        height: calc(100vh - 320px);
+        height: calc(100vh - 350px);
         overflow-y: auto;
+        overflow-x: hidden;
+    }
+    
+    /* Adjust chart container height */
+    .js-plotly-plot {
+        height: calc(100vh - 450px) !important;
     }
     
     /* Smooth transitions for all elements */
@@ -48,25 +69,14 @@ st.markdown("""
         transition: all 0.3s ease-in-out;
     }
     
-    /* Animation for bars */
-    @keyframes slideIn {
-        from {
-            transform: translateY(20px);
-            opacity: 0;
-        }
-        to {
-            transform: translateY(0);
-            opacity: 1;
-        }
-    }
-    
-    .animated-bar {
-        animation: slideIn 0.5s ease-out;
-    }
-    
-    /* Remove Streamlit padding */
+    /* Remove unnecessary padding */
     .main > div {
         padding-top: 0;
+    }
+    
+    /* Hide Streamlit footer */
+    footer {
+        display: none;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -210,7 +220,7 @@ def create_animated_bar_chart(base_costs, current_costs, highlight_division=None
         },
         xaxis_title="CSI Division",
         yaxis_title="Cost (Millions $)",
-        height=600,
+        height=400,
         xaxis={'tickangle': -45},
         plot_bgcolor='rgba(0,0,0,0)',
         paper_bgcolor='rgba(0,0,0,0)',
