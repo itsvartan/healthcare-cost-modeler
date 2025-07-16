@@ -293,7 +293,7 @@ def create_modern_bar_chart(base_costs, current_costs):
         showlegend=False,
         hoverlabel=dict(
             bgcolor="white",
-            font_size=14,
+            font=dict(size=14),
             bordercolor="rgba(0,0,0,0.1)"
         )
     )
