@@ -47,17 +47,17 @@ st.markdown("""
         .main {
             overflow: hidden !important;
             height: 100vh !important;
-            position: fixed !important;
-            width: calc(100% - var(--sidebar-width, 21rem)) !important;
-            left: var(--sidebar-width, 21rem) !important;
+            position: relative !important;
         }
         
         .main .block-container {
             overflow: hidden !important;
             height: 100vh !important;
             max-height: 100vh !important;
-            padding-top: 2rem;
-            padding-bottom: 2rem;
+            padding-top: 1rem;
+            padding-bottom: 1rem;
+            padding-left: 2rem;
+            padding-right: 2rem;
         }
         
         /* Sidebar scrollable */
@@ -73,14 +73,35 @@ st.markdown("""
         
         /* Tab content scrollable within fixed container */
         .stTabs [data-baseweb="tab-panel"] {
-            max-height: calc(100vh - 380px);
+            max-height: calc(100vh - 300px);
             overflow-y: auto;
             overflow-x: hidden;
         }
         
         /* Chart responsive height */
         .js-plotly-plot {
-            max-height: calc(100vh - 420px) !important;
+            max-height: calc(100vh - 350px) !important;
+        }
+        
+        /* Compact metrics */
+        [data-testid="metric-container"] {
+            padding: 0.5rem 1rem;
+        }
+        
+        /* Smaller title */
+        h3 {
+            font-size: 1.2rem !important;
+            margin-bottom: 0.5rem !important;
+        }
+        
+        /* Compact number inputs */
+        .stNumberInput {
+            margin-bottom: 0.5rem;
+        }
+        
+        /* Reduce divider spacing */
+        .stDivider {
+            margin: 0.5rem 0;
         }
         
         /* Hide any scrollbars on main */
@@ -242,7 +263,7 @@ def create_animated_bar_chart(base_costs, current_costs, highlight_division=None
         },
         xaxis_title="CSI Division",
         yaxis_title="Cost (Millions $)",
-        height=500,
+        height=380,
         xaxis={'tickangle': -45},
         plot_bgcolor='rgba(0,0,0,0)',
         paper_bgcolor='rgba(0,0,0,0)',
@@ -257,54 +278,51 @@ def create_animated_bar_chart(base_costs, current_costs, highlight_division=None
     return fig
 
 # Main App
-st.markdown("### Hospital Construction Cost Modeling Tool")
+st.markdown("#### Hospital Construction Cost Modeling Tool")
 
-# Project Configuration - Horizontal layout
-with st.container():
-    col1, col2, col3 = st.columns(3)
-    
-    with col1:
-        st.session_state.total_budget = st.number_input(
-            "Total Project Budget ($)",
-            min_value=100_000_000,
-            max_value=1_000_000_000,
-            value=st.session_state.total_budget,
-            step=10_000_000,
-            format="%d",
-            label_visibility="visible"
-        )
-    
-    with col2:
-        st.session_state.building_area = st.number_input(
-            "Building Area (sq ft)",
-            min_value=100000,
-            max_value=500000,
-            value=st.session_state.building_area,
-            step=10000,
-            label_visibility="visible"
-        )
-    
-    with col3:
-        # Calculate current cost per sq ft
-        current_cost_psf = st.session_state.total_budget / st.session_state.building_area
-        
-        # Make cost per sq ft adjustable
-        new_cost_psf = st.number_input(
-            "Cost per sq ft ($)",
-            min_value=100,
-            max_value=5000,
-            value=int(current_cost_psf),
-            step=50,
-            format="%d",
-            label_visibility="visible",
-            key="cost_psf_input"
-        )
-        
-        # Update total budget if cost per sq ft changed
-        if new_cost_psf != int(current_cost_psf):
-            st.session_state.total_budget = new_cost_psf * st.session_state.building_area
+# Project Configuration - Compact horizontal layout
+col1, col2, col3 = st.columns(3)
 
-st.divider()
+with col1:
+    st.session_state.total_budget = st.number_input(
+        "Total Budget ($)",
+        min_value=100_000_000,
+        max_value=1_000_000_000,
+        value=st.session_state.total_budget,
+        step=10_000_000,
+        format="%d",
+        label_visibility="visible"
+    )
+
+with col2:
+    st.session_state.building_area = st.number_input(
+        "Building Area (sq ft)",
+        min_value=100000,
+        max_value=500000,
+        value=st.session_state.building_area,
+        step=10000,
+        label_visibility="visible"
+    )
+
+with col3:
+    # Calculate current cost per sq ft
+    current_cost_psf = st.session_state.total_budget / st.session_state.building_area
+    
+    # Make cost per sq ft adjustable
+    new_cost_psf = st.number_input(
+        "Cost per sq ft ($)",
+        min_value=100,
+        max_value=5000,
+        value=int(current_cost_psf),
+        step=50,
+        format="%d",
+        label_visibility="visible",
+        key="cost_psf_input"
+    )
+    
+    # Update total budget if cost per sq ft changed
+    if new_cost_psf != int(current_cost_psf):
+        st.session_state.total_budget = new_cost_psf * st.session_state.building_area
 
 # Sidebar
 with st.sidebar:
