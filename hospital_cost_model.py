@@ -280,8 +280,10 @@ def create_modern_bar_chart(base_costs, current_costs):
             zerolinecolor='rgba(0,0,0,0.1)'
         ),
         yaxis=dict(
-            title="Cost (Millions USD)",
-            titlefont=dict(size=14, color='#86868B'),
+            title=dict(
+                text="Cost (Millions USD)",
+                font=dict(size=14, color='#86868B')
+            ),
             tickfont=dict(size=12, color='#86868B'),
             gridcolor='rgba(0,0,0,0.05)',
             zerolinecolor='rgba(0,0,0,0.1)'
